@@ -242,21 +242,21 @@ function parseMarkdownToBlocks(markdown) {
       const color = colorMap[colorMatch?.[1]] || 4;
       const emoji = emojiMatch?.[1] || 'bulb';
       
-      const calloutContent = [];
+      const calloutLines = [];
       i++;
       while (i < lines.length && !lines[i].trim().startsWith(':::')) {
-        if (lines[i].trim()) {
-          calloutContent.push(lines[i].trim());
-        }
+        calloutLines.push(lines[i]);
         i++;
       }
       i++;
+      
+      const childBlocks = parseMarkdownToBlocks(calloutLines.join('\n'));
       
       blocks.push({
         _type: 'callout',
         color: color,
         emoji: emoji,
-        content: calloutContent.join('\n'),
+        children: childBlocks,
       });
       continue;
     }
@@ -440,7 +440,7 @@ async function writeToFeishu(appId, appSecret, title, content, documentId = null
         console.log(`      ⚠️ 表格创建失败: ${tableError.message}`);
       }
     } else if (block._type === 'callout') {
-      console.log(`   💡 写入高亮块...`);
+      console.log(`   💡 写入高亮块 (包含 ${block.children?.length || 0} 个子块)...`);
       const calloutResult = await createBlocks(accessToken, docId, docId, [
         {
           block_type: 19,
@@ -453,12 +453,18 @@ async function writeToFeishu(appId, appSecret, title, content, documentId = null
       ], rootBlockIndex++);
       
       const calloutBlockId = calloutResult.children[0].block_id;
-      await createBlocks(accessToken, docId, calloutBlockId, [
-        {
-          block_type: 2,
-          text: { elements: parseInlineStyles(block.content) },
-        },
-      ]);  // 子块使用默认 index 0
+      
+      const childBlocks = block.children || [];
+      for (let childIdx = 0; childIdx < childBlocks.length; childIdx++) {
+        const childBlock = childBlocks[childIdx];
+        
+        if (childBlock._type === 'table' || childBlock._type === 'callout' || childBlock._type === 'grid') {
+          console.log(`      ⚠️ 高亮块不支持嵌套的复杂块类型，转为文本`);
+          continue;
+        }
+        
+        await createBlocks(accessToken, docId, calloutBlockId, [childBlock], childIdx);
+      }
     } else if (block._type === 'grid') {
       console.log(`   📐 写入分栏 (${block.columnCount} 列)...`);
       try {
