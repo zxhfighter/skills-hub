@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Generated files
+*.png
+*.jpg
+*.jpeg
+*.pdf
+*.svg
+
+# Temp files
+temp.mmd
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Example outputs
+examples/

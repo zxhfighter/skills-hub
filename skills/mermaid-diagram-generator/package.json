@@ -1,0 +1,22 @@
+{
+  "name": "mermaid-diagram-generator",
+  "version": "1.0.0",
+  "description": "Generate various types of diagrams using Mermaid.js syntax in OpenClaw",
+  "main": "scripts/generate_diagram.js",
+  "scripts": {
+    "generate": "node scripts/generate_diagram.js",
+    "test": "node scripts/test_examples.js"
+  },
+  "keywords": [
+    "mermaid",
+    "diagram",
+    "flowchart",
+    "sequence-diagram",
+    "gantt-chart",
+    "visualization"
+  ],
+  "author": "小红帽 🧢",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {}
+}
